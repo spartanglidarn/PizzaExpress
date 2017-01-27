@@ -1,6 +1,6 @@
 public class Grid {
 
-	private Crossing xy[][];
+	private int xy[][];
 	private int xAxis;
 	private int yAxis;
 	
@@ -9,15 +9,8 @@ public class Grid {
 		setXAxis(x);
 		setYAxis(y);
 		
-		xy = new Crossing [x][y];
-		//Create the grid array
-		for (int i = 0 ; i < x ; i++) {
-			
-			for (int a = 0 ; a < y ; a++) {
+		xy = new int [x][y];
 
-			}
-			
-		}
 	}
 	
 	public void setXAxis (int x){
@@ -33,11 +26,11 @@ public class Grid {
 		return this.yAxis;
 	}
 
-	public Crossing[][] getBoard(){
+	public int[][] getBoard(){
 		return xy;
 	}
 	
-	public void setBoardPos(int x,  int y, Crossing c){
+	public void setBoardPos(int x,  int y, int c){
 		this.xy[x][y] = c;
 	}
 }
