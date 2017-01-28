@@ -3,8 +3,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Main {
-
-	
+	private static int xDist;
+	private static int yDist;
+	private static int countDist;
+	private static int xAxis;
+	private static int yAxis;
+	private static int blockCount;
+	private static int cornerDeliv;
+	private static int kitchenX;
+	private static int kitchenY;
+	private static int dist;
+	private static int distAndDeliv;
 	
 	public static void main(String[] args) {
 
@@ -20,37 +29,38 @@ public class Main {
 		int testCount = 0;
 		//Loop for every testcase
 		for (int i = 0; i < nrOfTests; i++){
-			//test the time it takes to run program
-			long startTime = System.currentTimeMillis();
+
 			//set X and Y axis for the testcase grid.
 			/*
 			int xAxis = sc.nextInt();
 			int yAxis = sc.nextInt();
 			*/
-			int xAxis = io.getInt();
-			int yAxis = io.getInt();
+			xAxis = io.getInt();
+			yAxis = io.getInt();
 			//Create the testcase grid.
-			int g[][] = new int[xAxis][yAxis];
+			Crossings c[] = new Crossings[xAxis * yAxis];
+			int loopCounter = 0;
+			int delivs;
+			int loopX = 0;
+			int loopY = 0;
 			
-			for(int y = 0; y < yAxis; y++){		//ROWS(y Axis)
-				for (int x = 0; x < xAxis; x++){	//COLUMNS(xAxis)
-					
-					//take the deliv value of every crossing and put it in int variable
-					//int crossVal = sc.nextInt();
-					int crossVal = io.getInt();
-					//put the crossing value on the grid position
-					g[x][y] = crossVal;
-					
+			for (int xy = 0; xy < xAxis * yAxis; xy++){
+				loopX ++;
+				if( xy % xAxis == 0 ){
+				    loopX = 0;
+				    loopY ++;
 				}
-
-		}
-			//Send the grid to checkDist and then check the distance from the kitchen to delivery point
-			resultArr[testCount] = getShortestDist(g);
-			testCount ++;
+				
+				delivs = io.getInt();
+				c[loopCounter] = new Crossings(loopX, loopY, delivs);
+				loopCounter ++;
+			}
 			
-			long stopTime = System.currentTimeMillis();
-			long elapsedTime = stopTime - startTime;
-			io.println("time taken to run test: " + elapsedTime);
+
+			//Send the grid to checkDist and then check the distance from the kitchen to delivery point
+			resultArr[testCount] = getShortestDist(c);
+			testCount ++;
+
 		}
 		
 		//run thru the resultArr and print out the block results
@@ -61,51 +71,55 @@ public class Main {
 		io.close();
 	}
 
-	public static int getShortestDist(int[][] g){
+	public static int getShortestDist(Crossings[] c){
 		//get the gridsize
-		//Grid theGrid = g;
-		//int xAxis = theGrid.getXAxis();
-		//int yAxis = theGrid.getYAxis();
-		int xAxis = g.length;
-		int yAxis = g[0].length;
-		//int gridArr[][] = g;
+
+		//int xAxis = x;
+		//int yAxis = y;
+
 		ArrayList<Integer> movesMade = new ArrayList<Integer>();
-		int blockCount = 0;
-
+		blockCount = 0;
+		kitchenX = 0;
+		kitchenY = 0;
+		dist = 0;
+		distAndDeliv = 0;
 		
-		//Make a nested loop to test the kitchen on every position on the grid.
-		for (int y = 0; y < yAxis; y++){		//rows (YAxis)
-
-			for (int x = 0; x < xAxis; x++){			//columns (XAxis)
-				//reset blockcount
-				blockCount = 0;
-
-				//loop thru the grid with the kitchen on a specific position.
-				for (int ya = 0; ya < yAxis; ya ++){	//rows (YAxis)
-					for (int xa = 0; xa < xAxis; xa ++){	//columns (XAxis)
-						//check the distance only if there has been a delivery
-						int cornerDeliv = g[xa][ya];
-						if (cornerDeliv > 0){
-							int dist = checkDist(x, y, xa, ya);
-							//Multiply the distance to the delivery by the amount of deliveries made
-							int distAndDeliv = dist * cornerDeliv;
-							blockCount += distAndDeliv;
-						}
-					}
-				}
-				//add distance to the movesMade arrayList
-				movesMade.add(blockCount);
+		//Create a loop to test the kitchen on every position on the grid.
+		for (int xy = 0; xy<c.length; xy++){
+			blockCount = 0;
+			kitchenX ++;
+			//if the loop is at the end of the x axis, set x to 0 and jump down to the next rox on y 
+			if( xy % xAxis == 0 ){
+			    kitchenX = 0;
+			    kitchenY ++;
 			}
+			
+			//On every position of the grid, test the delivery.
+			for (int nestedXY = 0; nestedXY < c.length; nestedXY ++){
+				//get the deliveries from the crossing
+				cornerDeliv = c[nestedXY].getDeliveries();
+				//if there has been deliveries to the crossing check the distance.
+				if (cornerDeliv > 0){
+					dist = checkDist(c[nestedXY].getxAxis(), c[nestedXY].getyAxis(),
+							kitchenX, kitchenY);
+					distAndDeliv = dist * cornerDeliv;
+					blockCount += distAndDeliv;
+				}
+			}
+			//add the moves to arrayList with all the possible distances for the kitchen.
+			movesMade.add(blockCount);
 		}
+		
+
 		//check for the smallest amounts of moves made
 		int minBlockMoves = movesMade.indexOf(Collections.min(movesMade));
 		return movesMade.get(minBlockMoves);
 	}
 	
 	public static int checkDist(int kx, int ky, int gx, int gy){
-		int xDist = 0;
-		int yDist = 0;
-		int dist = 0;
+		xDist = 0;
+		yDist = 0;
+
 		//if kitchen has a HIGHER value or the same value on X AXIS
 		if (kx > gx){
 			xDist = (kx - gx);
@@ -123,10 +137,8 @@ public class Main {
 			yDist = (gy - ky);
 		}
 		
-		dist = (xDist + yDist);
-		return dist;
+		countDist = (xDist + yDist);
+		return countDist;
 	}
-	
-
 	
 }
